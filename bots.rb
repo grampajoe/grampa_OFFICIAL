@@ -16,10 +16,6 @@ Ebooks::Bot.new("grampa_OFFICIAL") do |bot|
 
   model = Ebooks::Model.load("model/grampa_OFFICIAL.model")
 
-  def make_response(tweet, meta)
-    meta[:reply_prefix] + model.make_response(tweet[:text], 130)
-  end
-
   bot.on_message do |dm|
     # Reply to a DM
     # bot.reply(dm, "secret secrets")
@@ -31,13 +27,15 @@ Ebooks::Bot.new("grampa_OFFICIAL") do |bot|
   end
 
   bot.on_mention do |tweet, meta|
-    bot.reply(tweet, make_response(tweet, meta))
+    response = meta[:reply_prefix] + model.make_response(tweet[:text], 130)
+    bot.reply(tweet, response)
   end
 
   bot.on_timeline do |tweet, meta|
     # Reply to a tweet in the bot's timeline
     1.in(10) do
-      bot.reply(tweet, make_response(tweet, meta))
+      response = meta[:reply_prefix] + model.make_response(tweet[:text], 130)
+      bot.reply(tweet, response)
     end
   end
 
