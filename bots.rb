@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'twitter_ebooks'
+require 'probability'
 
 # This is an example bot definition with event handlers commented out
 # You can define as many of these as you like; they will run simultaneously
@@ -15,6 +16,10 @@ Ebooks::Bot.new("grampa_OFFICIAL") do |bot|
 
   model = Ebooks::Model.load("model/grampa_OFFICIAL.model")
 
+  def make_response(tweet, meta)
+    meta[:reply_prefix] + model.make_response(tweet[:text], 130)
+  end
+
   bot.on_message do |dm|
     # Reply to a DM
     # bot.reply(dm, "secret secrets")
@@ -22,17 +27,18 @@ Ebooks::Bot.new("grampa_OFFICIAL") do |bot|
 
   bot.on_follow do |user|
     # Follow a user back
-    # bot.follow(user[:screen_name])
+    bot.follow(user[:screen_name])
   end
 
   bot.on_mention do |tweet, meta|
-    response = model.make_response(tweet[:text], 130)
-    bot.reply(tweet, meta[:reply_prefix] + response)
+    bot.reply(tweet, make_response(tweet, meta))
   end
 
   bot.on_timeline do |tweet, meta|
     # Reply to a tweet in the bot's timeline
-    # bot.reply(tweet, meta[:reply_prefix] + "nice tweet")
+    1.in(10) do
+      bot.reply(tweet, make_response(tweet, meta))
+    end
   end
 
   bot.scheduler.every ENV['TWEET_INTERVAL'] do

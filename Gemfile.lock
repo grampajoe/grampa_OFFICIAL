@@ -37,6 +37,7 @@ GEM
     minitest (5.3.5)
     multi_json (1.10.1)
     multipart-post (2.0.0)
+    probability (1.0.0)
     redis (3.1.0)
     rufus-scheduler (3.0.8)
       tzinfo
@@ -71,4 +72,5 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  probability
   twitter_ebooks
