@@ -23,19 +23,26 @@ Ebooks::Bot.new("grampa_OFFICIAL") do |bot|
 
   bot.on_follow do |user|
     # Follow a user back
-    bot.follow(user[:screen_name])
+    bot.scheduler.in '10s' do
+      bot.follow(user[:screen_name])
+    end
   end
 
   bot.on_mention do |tweet, meta|
     response = meta[:reply_prefix] + model.make_response(tweet[:text], 130)
-    bot.reply(tweet, response)
+
+    bot.scheduler.in '10s' do
+      bot.reply(tweet, response)
+    end
   end
 
   bot.on_timeline do |tweet, meta|
     # Reply to a tweet in the bot's timeline
     1.in(10) do
       response = meta[:reply_prefix] + model.make_response(tweet[:text], 130)
-      bot.reply(tweet, response)
+      bot.scheduler.in '10s' do
+        bot.reply(tweet, response)
+      end
     end
   end
 
