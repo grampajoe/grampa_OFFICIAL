@@ -3,9 +3,6 @@
 require 'twitter_ebooks'
 require 'probability'
 
-# This is an example bot definition with event handlers commented out
-# You can define as many of these as you like; they will run simultaneously
-
 Ebooks::Bot.new("grampa_OFFICIAL") do |bot|
   # Consumer details come from registering an app at https://dev.twitter.com/
   # OAuth details can be fetched with https://github.com/marcel/twurl
@@ -16,9 +13,13 @@ Ebooks::Bot.new("grampa_OFFICIAL") do |bot|
 
   model = Ebooks::Model.load("model/grampa_OFFICIAL.model")
 
-  bot.on_message do |dm|
-    # Reply to a DM
-    # bot.reply(dm, "secret secrets")
+  # Reply after a while
+  def reply_delayed(tweet, meta)
+    response = meta[:reply_prefix] + model.make_response(tweet[:text], 130)
+
+    bot.scheduler.in '10s' do
+      bot.reply(tweet, response)
+    end
   end
 
   bot.on_follow do |user|
@@ -29,20 +30,18 @@ Ebooks::Bot.new("grampa_OFFICIAL") do |bot|
   end
 
   bot.on_mention do |tweet, meta|
-    response = meta[:reply_prefix] + model.make_response(tweet[:text], 130)
-
-    bot.scheduler.in '10s' do
-      bot.reply(tweet, response)
+    # Unfollow if they ask me to
+    if tweet[:text].downcase.include?('unfollow')
+      bot.twitter.unfollow(tweet[:user][:screen_name])
+    else
+      reply_delayed(tweet, meta)
     end
   end
 
   bot.on_timeline do |tweet, meta|
     # Reply to a tweet in the bot's timeline
-    1.in(10) do
-      response = meta[:reply_prefix] + model.make_response(tweet[:text], 130)
-      bot.scheduler.in '10s' do
-        bot.reply(tweet, response)
-      end
+    1.in(100) do
+      reply_delayed(tweet, meta)
     end
   end
 
