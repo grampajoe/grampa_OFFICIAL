@@ -14,9 +14,7 @@ Ebooks::Bot.new("grampa_OFFICIAL") do |bot|
   model = Ebooks::Model.load("model/grampa_OFFICIAL.model")
 
   # Reply after a while
-  def reply_delayed(tweet, meta)
-    response = meta[:reply_prefix] + model.make_response(tweet[:text], 130)
-
+  def reply_delayed(tweet, response)
     bot.scheduler.in '10s' do
       bot.reply(tweet, response)
     end
@@ -34,14 +32,16 @@ Ebooks::Bot.new("grampa_OFFICIAL") do |bot|
     if tweet[:text].downcase.include?('unfollow')
       bot.twitter.unfollow(tweet[:user][:screen_name])
     else
-      reply_delayed(tweet, meta)
+      response = meta[:reply_prefix] + model.make_response(tweet[:text], 130)
+      reply_delayed(tweet, response)
     end
   end
 
   bot.on_timeline do |tweet, meta|
     # Reply to a tweet in the bot's timeline
     1.in(100) do
-      reply_delayed(tweet, meta)
+      response = meta[:reply_prefix] + model.make_response(tweet[:text], 130)
+      reply_delayed(tweet, response)
     end
   end
 
